@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vi — Мастер маникюра</title>
+
+    <!-- КРИТИЧЕСКОЕ: Защита от "прыгающих" шрифтов -->
+    <style>
+        @font-face {
+            font-family: 'Playfair Display';
+            font-style: normal;
+            font-weight: 700;
+            src: url('https://fonts.gstatic.com/s/playfairdisplay/v37/nuFkD-vyKJDeE4jBixFw4Q.woff2') format('woff2');
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Montserrat';
+            font-style: normal;
+            font-weight: 400;
+            src: url('https://fonts.gstatic.com/s/montserrat/v26/JTUSjIg6_i4aTm5h8c8w.woff2') format('woff2');
+            font-display: swap;
+        }
+    </style>
+
+    <!-- Подключение шрифтов -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #f5efe6;
+            --text-dark: #2c2c2c;
+            --text-muted: #555;
+            --accent: #8c6d4d;
+            --accent-dark: #5c4630;
+            --border: #d4c5b5;
+            --container-width: 1200px;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+            cursor: default;
+        }
+
+        /* Кнопки */
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px 30px;
+            border: 2px solid var(--text-dark);
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            text-align: center;
+            min-height: 60px;
+            position: relative;
+            background: transparent;
+            color: var(--text-dark);
+            user-select: none;
+            min-width: 200px;
+        }
+        .btn:hover {
+            background-color: var(--text-dark);
+            color: var(--bg);
+            transform: translateY(-4px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.18);
+        }
+        .btn:active {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        .btn-primary {
+            background-color: var(--text-dark);
+            color: var(--bg);
+        }
+        .btn-primary:hover {
+            background-color: var(--accent);
+            border-color: var(--accent);
+            color: var(--text-dark);
+        }
+
+        /* Секция Hero */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            position: relative;
+            background: linear-gradient(135deg, var(--bg) 0%, #efe5d8 100%);
+        }
+        .container {
+            max-width: var(--container-width);
+            margin: 0 auto;
+            width: 100%;
+            text-align: center;
+        }
+        .avatar {
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 10px solid var(--accent);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+            margin-bottom: 50px;
+            transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .avatar:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 5.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 15px;
+            line-height: 1;
+            letter-spacing: -3px;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .subtitle-main {
+            font-size: 1.3rem;
+            color: var(--text-muted);
+            margin-bottom: 60px;
+            font-weight: 400;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .tagline {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 1.2rem;
+            color: var(--accent-dark);
+            margin-top: 40px;
+            margin-bottom: 120px; 
+            opacity: 0.8;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        /* Модалки */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.95);
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(15px);
+            animation: fadeIn 0.3s ease;
+        }
+        .modal-content {
+            background: var(--bg);
+            padding: 40px 30px;
+            border-radius: 30px;
+            max-width: 90%;
+            width: 900px;
+            position: relative;
+            color: var(--text-dark);
+            text-align: center;
+            border: 1px solid var(--border);
+            box-shadow: 0 40px 80px rgba(0,0,0,0.3);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 30px;
+            cursor: pointer;
+            color: var(--text-dark);
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+        .close:hover {
+            background: var(--accent);
+        }
+
+        .price-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        .price-item:last-child {
+            border-bottom: none;
+        }
+        .price-value {
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .map-yandex {
+            width: 100%;
+            height: 400px;
+            border-radius: 20px;
+            margin-top: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .calendar-container {
+            width: 100%;
+            height: 600px;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            margin-top: 20px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .hero { padding: 20px 10px; }
+            h1 { font-size: 3.2rem; }
+            .avatar { width: 200px; height: 200px; margin-bottom: 30px; }
+            .subtitle-main { font-size: 1.1rem; margin-bottom: 40px; }
+            .btn { padding: 16px 20px; font-size: 15px; min-width: 160px; min-height: 50px; }
+            .modal-content { padding: 30px 20px; width: 95%; }
+            .map-yandex { height: 250px; }
+            .calendar-container { height: 500px; }
+            .tagline { margin-bottom: 80px; }
+        }
+    </style>
+</head>
+<body>
+
+    <section class="hero">
+        <div class="container">
+            <img alt="Мастер Vi" class="avatar" id="01a1588b-ced3-79cc-bae6-f1fa88814434">
+            <h1>Vi</h1>
+            <p class="subtitle-main">Маникюр • Наращивание • Дизайн<br>Студия в Новосибирске • пр. Дзержинского 1/1</p>
+            <p class="tagline">«Искусство в деталях. Твой идеальный ритуал красоты».</p>
+            
+            <div class="buttons">
+                <div class="btn btn-primary" onclick="openModal('booking')">Записаться</div>
+                <div class="btn" onclick="openModal('price')">Прайс</div>
+                <a href="https://yandex.ru/maps/65/novosibirsk/house/prospekt_dzerzhinskogo_1_1/bEsYfwNpSEQEQFtvfXx1cnhkbQ==/?indoorLevel=1&ll=82.949113%2C55.043479&z=17.11" target="_blank" class="btn">
+                    Адрес
+                </a>
+                <a href="https://t.me/LenkinaTS" target="_blank" class="btn">Контакты</a>
+                <a href="https://disk.yandex.ru/d/Rtghe4OGMMWIvg" target="_blank" class="btn">Мои работы</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Модалка Прайса -->
+    <div id="price" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('price')">&times;</span>
+            <h2 style="font-family: 'Playfair Display', serif; margin-bottom: 30px;">Услуги и стоимость</h2>
+            <div class="price-item"><span>Маникюр без покрытия</span><span class="price-value">800 ₽</span></div>
+            <div class="price-item"><span>Маникюр «всё включено»</span><span class="price-value">2 000 ₽</span></div>
+            <div class="price-item"><span>Наращивание ногтей</span><span class="price-value">3 000 ₽</span></div>
+            <div class="price-item"><span>Дизайн (френч, втирка)</span><span class="price-value">+300 ₽</span></div>
+        </div>
+    </div>
+
+    <!-- Модалка Адреса -->
+    <div id="address" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <span class="close" onclick="closeModal('address')">&times;</span>
+            <h2 style="font-family: 'Playfair Display', serif; margin-bottom: 20px;">Наш салон</h2>
+            <p>Новосибирск, проспект Дзержинского 1/1</p>
+        </div>
+    </div>
+
+    <!-- Модалка Бронирования (ВИДЖЕТ БЕЗ ЛИШНЕГО ТЕКСТА) -->
+    <div id="booking" class="modal">
+        <div class="modal-content" style="max-width: 95%; height: 95%; padding: 0; margin: 0; border-radius: 0;">
+            <span class="close" onclick="closeModal('booking')" style="top: 10px; right: 10px;">&times;</span>
+            <h2 style="font-family: 'Playfair Display', serif; margin: 20px 0 10px;">Выберите время</h2>
+            <div class="calendar-container" style="width: 100%; height: 100%; margin: 0; padding: 0;">
+                <!-- 
+                    ПАРАМЕТР showTitle=0 УБИРАЕТ ИМЯ И ОПИСАНИЕ.
+                    Остаётся только чистый календарь со слотами.
+                -->
+                <iframe 
+                    src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ3TI7JzSlq2QpotxDMoRo5Rtaav4ZShEonh4mhzLWFfuZr64I92sikdCeI_UM-QBm2NyAmy6AvL?gv=true&showTitle=0"
+                    style="border: 0; width: 100%; height: 100%; margin: 0; padding: 0;" 
+                    frameborder="0" scrolling="no">
+                </iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModal(id) {
+            document.getElementById(id).style.display = 'flex';
+        }
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
